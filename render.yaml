@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: olivia
+    runtime: docker
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: OLIVIA_PROVIDER
+        value: openai-compatible
+      - key: OLIVIA_MODEL
+        value: gpt-4o-mini
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_BASE_URL
+        value: https://api.openai.com/v1/chat/completions
