@@ -220,6 +220,8 @@ form.addEventListener('submit', async event => {
 </script></body>""",
 )
 
+UI_HTML = Path(__file__).with_name("web_ui.html").read_text(encoding="utf-8").replace("__BACKGROUND__", BACKGROUND)
+
 
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *_args):
@@ -230,7 +232,7 @@ class Handler(BaseHTTPRequestHandler):
             body = b'{"ok":true,"background":"custom-image"}'
             content_type = "application/json"
         elif self.path == "/":
-            body = HTML.encode("utf-8")
+            body = UI_HTML.encode("utf-8")
             content_type = "text/html; charset=utf-8"
         else:
             body = b"Not found"
@@ -261,13 +263,15 @@ class Handler(BaseHTTPRequestHandler):
                 return
             self.send_json({"response": ask_model(message), "model": OLLAMA_MODEL})
         except HTTPError as error:
-            if error.code == 404:
+            if AI_PROVIDER in ("openai", "openai-compatible") and error.code in (401, 403):
+                detail = "The hosted AI API key was rejected. Check OPENAI_API_KEY in Render and redeploy."
+            elif error.code == 404:
                 detail = f"Ollama model '{OLLAMA_MODEL}' was not found. Run: ollama pull {OLLAMA_MODEL}"
             else:
-                detail = f"Ollama returned HTTP {error.code}."
+                detail = f"{AI_PROVIDER} provider returned HTTP {error.code}."
             self.send_json({"error": detail}, 502)
         except URLError:
-            self.send_json({"error": "Ollama is not running. Start Ollama, then try again."}, 502)
+            self.send_json({"error": f"{AI_PROVIDER} provider is unavailable."}, 502)
         except (json.JSONDecodeError, ValueError):
             self.send_json({"error": "Invalid message request."}, 400)
         except Exception as error:
