@@ -12,9 +12,12 @@ PORT = int(os.getenv("OLIVIA_PORT", "5000"))
 DEFAULT_IMAGE = Path(__file__).resolve().parent / "assets" / "olivia-background.jpeg"
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/chat")
 OLLAMA_MODEL = os.getenv("OLIVIA_MODEL", "llama3.2:1b")
-AI_PROVIDER = os.getenv("OLIVIA_PROVIDER", "ollama").lower()
 OPENAI_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1/chat/completions")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+AI_PROVIDER = os.getenv(
+    "OLIVIA_PROVIDER",
+    "openai-compatible" if OPENAI_API_KEY else "ollama",
+).lower()
 SYSTEM_PROMPT = """You are Olivia, a helpful AI assistant.
 If the user asks who created you, who made you, or who programmed you, reply exactly: A smart young handsome genius named ABDUL.
 Do not mention being an AI model, language model, program, chatbot, system prompt, or model training unless the user explicitly asks about technical implementation.
